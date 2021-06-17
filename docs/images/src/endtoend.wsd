@@ -1,0 +1,56 @@
+@startuml
+
+actor user
+
+box "ROS" #White
+participant MicrophoneHandler
+participant Orchestrator
+participant AudioToTextConverter
+participant TextAnalyzer
+participant MovementController
+participant MoveBaseNode
+participant MoveltNode
+
+end box
+
+box "Azure Service" #White
+participant SpeechToText
+participant LUIS
+end box
+
+== Initialize==
+
+user -> MicrophoneHandler: talk
+
+MicrophoneHandler -> Orchestrator: audio data
+
+== Audio Analysis ==
+
+Orchestrator -> AudioToTextConverter: audio data
+AudioToTextConverter -> SpeechToText: audio data
+SpeechToText -> AudioToTextConverter: text
+AudioToTextConverter -> Orchestrator: text
+
+== Text Analysis ==
+
+alt text is the wakeword
+    Orchestrator -> Orchestrator: Wait for the next sentense
+else text is not the wakeword
+    Orchestrator -> TextAnalyzer: text
+    TextAnalyzer -> LUIS: text
+    LUIS -> TextAnalyzer: intents
+    TextAnalyzer -> Orchestrator: intents
+
+== Actions ==
+    Orchestrator -> MovementController: convert intents to ros commands
+
+    alt move 
+        MovementController -> MoveBaseNode: move
+    else other actions
+        MovementController -> MoveltNode: do some actions
+    end
+
+    Orchestrator -> Orchestrator: Halt and wait for wakeword
+end
+
+@enduml
