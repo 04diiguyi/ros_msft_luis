@@ -13,7 +13,7 @@ participant MoveltNode
 
 end box
 
-box "Azure Service" #White
+box "Azure Service (Cloud/Container)" #White
 participant SpeechToText
 participant LUIS
 end box
